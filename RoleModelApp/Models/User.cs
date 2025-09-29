@@ -34,4 +34,6 @@ public class User
     public DateTime? PasswordSetUtc { get; set; }
 
     public bool IsAdmin => Username.Equals("ADMIN", StringComparison.OrdinalIgnoreCase);
+
+    public bool PasswordExpired => DateTime.UtcNow >= PasswordSetUtc?.AddMonths(PasswordExpiryMonths) && PasswordExpiryMonths != 0;
 }

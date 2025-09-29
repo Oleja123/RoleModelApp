@@ -45,7 +45,14 @@ public class InMemoryDb : IDisposable
 
                 using var sourceConn = new SqliteConnection($"Data Source={tempFile}");
                 sourceConn.Open();
-                _connection.BackupDatabase(sourceConn);
+                sourceConn.BackupDatabase(_connection);
+                sourceConn.Close();
+                SqliteConnection.ClearPool(sourceConn);
+                sourceConn.Dispose();
+                if(Context.Users.ToList().Count == 0)
+                {
+                    throw new Exception();
+                }
             }
             catch (Exception)
             {
@@ -83,18 +90,20 @@ public class InMemoryDb : IDisposable
         string tempFile = Path.GetTempFileName();
         try
         {
-            using (var fileConn = new SqliteConnection($"Data Source={tempFile}"))
-            {
-                fileConn.Open();
-                _connection.BackupDatabase(fileConn);
-            }
+            var fileConn = new SqliteConnection($"Data Source={tempFile}");
+            fileConn.Open();
+            _connection.BackupDatabase(fileConn);
+
+            fileConn.Close();
+            SqliteConnection.ClearPool(fileConn);
+            fileConn.Dispose();
 
             byte[] dbBytes = File.ReadAllBytes(tempFile);
             byte[] encryptedBytes = FileCrypto.Encrypt(dbBytes, _key, _iv);
 
             File.WriteAllBytes(_filePath, encryptedBytes);
         }
-        catch(Exception)
+        catch (Exception)
         {
             throw new Exception("Не удалось сохранить данные");
         }

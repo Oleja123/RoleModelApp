@@ -1,76 +1,117 @@
-﻿using Services.Utils;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
-public class LoginForm : Form
+namespace Forms
 {
-    private TextBox txtUsername;
-    private TextBox txtPassword;
-    private Button btnLogin;
-
-    private InMemoryDb _db;
-    private UserService _userService;
-
-    public LoginForm()
+    public partial class LoginForm : Form
     {
-        var (key, iv) = KeyStorage.LoadKeyIv("key_iv.dat");
+        private readonly UserService _userService;
+        private int _failedAttempts = 0;
+        public User LoggedInUser { get; private set; }
 
-        _db = new InMemoryDb("auth_encrypted.db", key, iv);
-        _userService = new UserService(_db);
-        InitializeComponents();
-    }
-
-    private void InitializeComponents()
-    {
-        this.Text = "Вход";
-        this.Width = 1000;
-        this.Height = 1000;
-
-        Label lblUser = new Label() { Text = "Имя пользователя:", Left = 10, Top = 20, Width = 120 };
-        txtUsername = new TextBox() { Left = 140, Top = 20, Width = 120 };
-
-        Label lblPass = new Label() { Text = "Пароль:", Left = 10, Top = 60, Width = 120 };
-        txtPassword = new TextBox() { Left = 140, Top = 60, Width = 120, UseSystemPasswordChar = true };
-
-        btnLogin = new Button() { Text = "Войти", Left = 140, Top = 100, Width = 80 };
-        btnLogin.Click += BtnLogin_Click;
-
-        this.Controls.Add(lblUser);
-        this.Controls.Add(txtUsername);
-        this.Controls.Add(lblPass);
-        this.Controls.Add(txtPassword);
-        this.Controls.Add(btnLogin);
-    }
-
-    private void BtnLogin_Click(object sender, EventArgs e)
-    {
-        string username = txtUsername.Text;
-        string password = txtPassword.Text;
-
-        try
+        public LoginForm(UserService userService)
         {
+            InitializeComponent();
+            _userService = userService;
+        }
 
-            bool ok = _userService.VerifyPassword(username, password);
+        private void btnLogin_Click(object sender, EventArgs e)
+        {
+            string username = txtUsername.Text.Trim();
+            string password = txtPassword.Text;
 
-            if (ok)
-                MessageBox.Show($"Добро пожаловать, {username}!", "Успешный вход", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (string.IsNullOrEmpty(username))
+            {
+                MessageBox.Show("Введите имя пользователя");
+                return;
+            }
+
+            var user = _userService.GetAllUsers().FirstOrDefault(u => u.Username == username);
+            if (user == null)
+            {
+                MessageBox.Show("Пользователь не найден");
+                return;
+            }
+
+            if (user.IsBlocked)
+            {
+                MessageBox.Show("Учётная запись заблокирована");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(user.PasswordHash))
+            {
+                if (!SetNewPassword(user))
+                    return;
+            }
             else
-                MessageBox.Show("Неверное имя пользователя или пароль.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            {
+                if (!_userService.VerifyPassword(username, password))
+                {
+                    _failedAttempts++;
+                    MessageBox.Show("Неверный пароль");
+
+                    if (_failedAttempts >= 3)
+                    {
+                        MessageBox.Show("Превышено количество попыток входа. Программа будет закрыта.",
+                            "Ошибка входа", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                        Application.Exit();
+                    }
+                    return;
+                }
+                else
+                {
+                    _failedAttempts = 0;
+                    string? res;
+                    if ((user.PasswordExpired || !UserService.ValidatePassword(password, user, out res)) && !SetNewPassword(user))
+                        return;
+                }
+            }
+
+            LoggedInUser = user;
+            DialogResult = DialogResult.OK;
+            Close();
         }
-        catch (Exception ex)
+
+        private bool SetNewPassword(User user)
         {
-            MessageBox.Show("Ошибка: " + ex.Message);
+            using var dlg = new SetPasswordForm();
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return false;
+
+            string newPassword = dlg.Password;
+            string confirmPassword = dlg.ConfirmPassword;
+
+            if (newPassword != confirmPassword)
+            {
+                MessageBox.Show("Пароли не совпадают");
+                return false;
+            }
+
+            try
+            {
+                _userService.ChangePassword(user.Username, newPassword);
+                MessageBox.Show("Пароль успешно установлен");
+                return true;
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+                return false;
+            }
         }
-    }
 
-    private void InitializeComponent()
-    {
-
-    }
-
-    protected override void OnFormClosed(FormClosedEventArgs e)
-    {
-        base.OnFormClosed(e);
-        _db?.Dispose();
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+            Close();
+        }
     }
 }

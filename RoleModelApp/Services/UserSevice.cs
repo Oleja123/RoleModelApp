@@ -39,15 +39,6 @@ public class UserService
         return _db.Context.Users.ToList();
     }
 
-    public void SetBlocked(string username, bool blocked)
-    {
-        var user = _db.Context.Users.FirstOrDefault(u => u.Username == username);
-        if (user == null) throw new InvalidOperationException("Пользователь не найден.");
-
-        user.IsBlocked = blocked;
-        _db.Context.SaveChanges();
-    }
-
     public void ChangePassword(string username, string newPassword)
     {
         var user = _db.Context.Users.FirstOrDefault(u => u.Username == username);
@@ -58,6 +49,7 @@ public class UserService
 
         user.PasswordHash = ComputeMD5Hash(newPassword, user.Salt);
         user.PasswordSetUtc = DateTime.UtcNow;
+        _db.Context.Update(user);
         _db.Context.SaveChanges();
     }
 
@@ -78,7 +70,7 @@ public class UserService
         return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
     }
 
-    private static bool ValidatePassword(string password, User user, out string? reason)
+    public static bool ValidatePassword(string password, User user, out string? reason)
     {
         reason = null;
 
@@ -99,5 +91,34 @@ public class UserService
         }
 
         return true;
+    }
+
+    public void UpdateUser(User user, bool isBlocked, bool requireLetter, bool requirePunctuation, int minPasswordLength, int passwordExpiryMonths)
+    {
+        if (user == null)
+            throw new ArgumentNullException(nameof(user));
+
+        if (string.IsNullOrWhiteSpace(user.Username))
+            throw new InvalidOperationException("Имя пользователя не может быть пустым.");
+
+        if (minPasswordLength < 0)
+            throw new InvalidOperationException("Минимальная длина пароля не может быть отрицательной.");
+
+        if (passwordExpiryMonths < 0)
+            throw new InvalidOperationException("Срок действия пароля не может быть отрицательным.");
+
+        user.IsBlocked = isBlocked;
+        user.RequireLetter = requireLetter;
+        user.RequirePunctuation = requirePunctuation;
+        user.MinPasswordLength = minPasswordLength;
+        user.PasswordExpiryMonths = passwordExpiryMonths;
+
+        _db.Context.Update(user);
+        _db.Context.SaveChanges();
+    }
+
+    public void ContextSaveChanges()
+    {
+        _db.Context.SaveChanges();
     }
 }

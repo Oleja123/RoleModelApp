@@ -9,8 +9,8 @@ namespace Services.Utils
 {
     public static class KeyStorage
     {
-        private static readonly int KeySize = 32; // 256 бит
-        private static readonly int IvSize = 16;  // 128 бит
+        private static readonly int KeySize = 8;
+        private static readonly int IvSize = 8;  
 
         public static void SaveKeyIv(byte[] key, byte[] iv, string filePath)
         {
