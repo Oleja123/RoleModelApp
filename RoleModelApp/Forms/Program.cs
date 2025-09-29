@@ -14,42 +14,49 @@ namespace Forms
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            var (key, iv) = KeyStorage.LoadKeyIv("key_iv.dat");
-            InMemoryDb inMemoryDb = new InMemoryDb("auth_encrypted.db", key, iv);
-            UserService userService = new UserService(inMemoryDb);
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-
-            using (var codeForm = new CodePhraseForm())
+            try
             {
-                codeForm.ShowDialog();
-                if (!codeForm.IsVerified)
-                    return;
-            }
+                var (key, iv) = KeyStorage.LoadKeyIv("key_iv.dat");
+                InMemoryDb inMemoryDb = new InMemoryDb("auth_encrypted.db", key, iv);
+                UserService userService = new UserService(inMemoryDb);
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
 
-            using (var loginForm = new LoginForm(userService))
-            {
-                if (loginForm.ShowDialog() == DialogResult.OK)
+                using (var codeForm = new CodePhraseForm())
                 {
-                    var user = loginForm.LoggedInUser;
+                    codeForm.ShowDialog();
+                    if (!codeForm.IsVerified)
+                        return;
+                }
 
-                    if (user.IsAdmin)
+                using (var loginForm = new LoginForm(userService))
+                {
+                    if (loginForm.ShowDialog() == DialogResult.OK)
                     {
-                        using (var adminForm = new AdminForm(userService))
+                        var user = loginForm.LoggedInUser;
+
+                        if (user.IsAdmin)
                         {
-                            adminForm.ShowDialog();
+                            using (var adminForm = new AdminForm(userService))
+                            {
+                                adminForm.ShowDialog();
+                            }
                         }
-                    }
-                    else
-                    {
-                        using (var userForm = new UserForm(userService, user))
+                        else
                         {
-                            userForm.ShowDialog();
+                            using (var userForm = new UserForm(userService, user))
+                            {
+                                userForm.ShowDialog();
+                            }
                         }
                     }
                 }
+                inMemoryDb.Dispose();
             }
-            inMemoryDb.Dispose();
+            catch (Exception ex)
+            {
+                MessageBox.Show("Неожиданная ошибка");
+            }
         }
     }
 }

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Windows.Forms;
+using Models;
 
 namespace Forms
 {
     public partial class CodePhraseForm : Form
     {
-        private readonly string _expectedCodePhrase = "Россия вперед";
         private TextBox txtCodePhrase;
         private Button btnOk;
         private Label lblPrompt;
@@ -56,7 +56,7 @@ namespace Forms
 
         private void BtnOk_Click(object sender, EventArgs e)
         {
-            if (txtCodePhrase.Text == _expectedCodePhrase)
+            if (txtCodePhrase.Text == Key.Value)
             {
                 IsVerified = true;
                 this.Close();

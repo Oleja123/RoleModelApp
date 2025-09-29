@@ -45,10 +45,7 @@ public static class FileCrypto
     public static byte[] GenerateRandomBytes(int length)
     {
         var bytes = new byte[length];
-        using (var rng = new RNGCryptoServiceProvider())
-        {
-            rng.GetBytes(bytes);
-        }
+        RandomNumberGenerator.Fill(bytes);
         return bytes;
     }
 }

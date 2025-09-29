@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Models;
 
 namespace Services.Utils
 {
@@ -25,7 +26,15 @@ namespace Services.Utils
             byte[] iv;
             if (!File.Exists(filePath))
             {
-                key = RandomNumberGenerator.GetBytes(KeySize);
+                byte[] hash;
+
+                using (MD5 md5 = MD5.Create())
+                {
+                    hash = md5.ComputeHash(Encoding.UTF8.GetBytes(Key.Value));
+                }
+
+                key = new byte[8];
+                Array.Copy(hash, key, 8);
                 iv = RandomNumberGenerator.GetBytes(IvSize);
                 SaveKeyIv(key, iv, filePath);
                 return (key, iv);
