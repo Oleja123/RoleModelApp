@@ -101,6 +101,9 @@ public class UserService
         if (string.IsNullOrWhiteSpace(user.Username))
             throw new InvalidOperationException("Имя пользователя не может быть пустым.");
 
+        if(string.Equals(user.Username, "ADMIN") && user.IsBlocked)
+            throw new InvalidOperationException("Администратора нельзя заблокировать");
+
         if (minPasswordLength < 0)
             throw new InvalidOperationException("Минимальная длина пароля не может быть отрицательной.");
 

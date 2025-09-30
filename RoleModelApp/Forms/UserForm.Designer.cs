@@ -15,32 +15,63 @@
 
         private void InitializeComponent()
         {
-            this.btnChangePassword = new System.Windows.Forms.Button();
-            this.btnExit = new System.Windows.Forms.Button();
+            btnChangePassword = new Button();
+            btnExit = new Button();
+            TableLayoutPanel layout = new TableLayoutPanel();
 
-            this.SuspendLayout();
+            SuspendLayout();
 
+            // 
+            // layout
+            // 
+            layout.Dock = DockStyle.Fill;
+            layout.ColumnCount = 1;
+            layout.RowCount = 3;
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 50F)); // верхний отступ
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));     // кнопка смены пароля
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));     // кнопка выхода
+            layout.Padding = new Padding(20);
+            layout.AutoSize = true;
+            layout.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+
+            // 
             // btnChangePassword
-            this.btnChangePassword.Location = new System.Drawing.Point(30, 30);
-            this.btnChangePassword.Size = new System.Drawing.Size(200, 40);
-            this.btnChangePassword.Text = "Сменить пароль";
-            this.btnChangePassword.Click += new System.EventHandler(this.btnChangePassword_Click);
+            // 
+            btnChangePassword.Text = "Сменить пароль";
+            btnChangePassword.AutoSize = true;
+            btnChangePassword.Anchor = AnchorStyles.None;
+            btnChangePassword.Padding = new Padding(10, 5, 10, 5);
+            btnChangePassword.Click += btnChangePassword_Click;
 
+            // 
             // btnExit
-            this.btnExit.Location = new System.Drawing.Point(30, 80);
-            this.btnExit.Size = new System.Drawing.Size(200, 40);
-            this.btnExit.Text = "Выход";
-            this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
+            // 
+            btnExit.Text = "Выход";
+            btnExit.AutoSize = true;
+            btnExit.Anchor = AnchorStyles.None;
+            btnExit.Padding = new Padding(10, 5, 10, 5);
+            btnExit.Click += btnExit_Click;
 
+            // добавляем кнопки в layout
+            layout.Controls.Add(btnChangePassword, 0, 1);
+            layout.Controls.Add(btnExit, 0, 2);
+
+            // 
             // UserForm
-            this.ClientSize = new System.Drawing.Size(260, 180);
-            this.Controls.Add(this.btnChangePassword);
-            this.Controls.Add(this.btnExit);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Пользователь";
-            this.ResumeLayout(false);
+            // 
+            AutoScaleMode = AutoScaleMode.Font;
+            AutoSize = true;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            ClientSize = new Size(300, 200);
+            Controls.Add(layout);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Пользователь";
+
+            ResumeLayout(false);
         }
+
     }
 }

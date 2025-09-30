@@ -14,30 +14,59 @@ namespace Forms
     {
         public static string ShowDialog(string text, string caption, bool isPassword = true)
         {
-            Form prompt = new Form()
+            using (Form prompt = new Form())
             {
-                Width = 360,
-                Height = 150,
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                Text = caption,
-                StartPosition = FormStartPosition.CenterScreen,
-                MinimizeBox = false,
-                MaximizeBox = false
-            };
+                prompt.Text = caption;
+                prompt.StartPosition = FormStartPosition.CenterScreen;
+                prompt.FormBorderStyle = FormBorderStyle.FixedDialog;
+                prompt.MinimizeBox = false;
+                prompt.MaximizeBox = false;
+                prompt.AutoSize = true;
+                prompt.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+                prompt.Padding = new Padding(10);
 
-            Label lblText = new Label() { Left = 20, Top = 20, Text = text, AutoSize = true };
-            TextBox txtInput = new TextBox() { Left = 20, Top = 50, Width = 300 };
+                Label lblText = new Label()
+                {
+                    Text = text,
+                    AutoSize = true,
+                    MaximumSize = new Size(400, 0)
+                };
+                lblText.Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 10);
 
-            if (isPassword)
-                txtInput.UseSystemPasswordChar = true;
+                TextBox txtInput = new TextBox()
+                {
+                    Width = 350,
+                    Anchor = AnchorStyles.Left | AnchorStyles.Right
+                };
+                if (isPassword)
+                    txtInput.UseSystemPasswordChar = true;
 
-            Button btnOk = new Button() { Text = "OK", Left = 160, Width = 80, Top = 80, DialogResult = DialogResult.OK };
-            prompt.Controls.Add(lblText);
-            prompt.Controls.Add(txtInput);
-            prompt.Controls.Add(btnOk);
-            prompt.AcceptButton = btnOk;
+                Button btnOk = new Button()
+                {
+                    Text = "OK",
+                    DialogResult = DialogResult.OK,
+                    AutoSize = true,
+                    Anchor = AnchorStyles.Right
+                };
 
-            return prompt.ShowDialog() == DialogResult.OK ? txtInput.Text : "";
+                FlowLayoutPanel panel = new FlowLayoutPanel()
+                {
+                    FlowDirection = FlowDirection.TopDown,
+                    Dock = DockStyle.Fill,
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    WrapContents = false
+                };
+
+                panel.Controls.Add(lblText);
+                panel.Controls.Add(txtInput);
+                panel.Controls.Add(btnOk);
+
+                prompt.Controls.Add(panel);
+                prompt.AcceptButton = btnOk;
+
+                return prompt.ShowDialog() == DialogResult.OK ? txtInput.Text : "";
+            }
         }
     }
 
@@ -50,14 +79,6 @@ namespace Forms
             InitializeComponent();
             _userService = userService;
             LoadUsers();
-
-            menuRefresh.Click += (s, e) => btnRefresh_Click(s, e);
-            menuMoveTop.Click += (s, e) => btnMoveTop_Click(s, e);
-            menuMoveBottom.Click += (s, e) => btnMoveBottom_Click(s, e);
-            menuAddUser.Click += (s, e) => btnAddUser_Click(s, e);
-            menuChangeAdminPassword.Click += (s, e) => BtnChangeAdminPassword_Click(s, e);
-            menuEditUser.Click += (s, e) => btnEditUser_Click(s, e);
-            menuExit.Click += (s, e) => Close();
         }
 
         private void LoadUsers()
@@ -80,6 +101,9 @@ namespace Forms
             dataGridViewUsers.Columns["RequirePunctuation"].ReadOnly = false;
             dataGridViewUsers.Columns["MinPasswordLength"].ReadOnly = false;
             dataGridViewUsers.Columns["PasswordExpiryMonths"].ReadOnly = false;
+            dataGridViewUsers.Columns["IsAdmin"].Visible = false;
+            dataGridViewUsers.Columns["PasswordExpired"].Visible = false;
+
 
             dataGridViewUsers.Columns["Username"].HeaderText = "Имя пользователя";
             dataGridViewUsers.Columns["PasswordHash"].HeaderText = "Хэш пароля";
@@ -90,6 +114,7 @@ namespace Forms
             dataGridViewUsers.Columns["RequirePunctuation"].HeaderText = "Требовать пунктуацию";
             dataGridViewUsers.Columns["MinPasswordLength"].HeaderText = "Мин. длина пароля";
             dataGridViewUsers.Columns["PasswordExpiryMonths"].HeaderText = "Срок действия (мес)";
+            dataGridViewUsers.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
         }
 
         private void dataGridViewUsers_CurrentCellDirtyStateChanged(object sender, EventArgs e)

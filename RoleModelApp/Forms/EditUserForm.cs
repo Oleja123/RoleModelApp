@@ -26,7 +26,6 @@ namespace Forms
             txtPasswordHash.Text = _user.PasswordHash;
             txtSalt.Text = _user.Salt;
             txtPasswordSetUtc.Text = _user.PasswordSetUtc?.ToString("u") ?? "(не установлено)";
-            chkIsAdmin.Checked = _user.IsAdmin;
 
             chkBlocked.Checked = _user.IsBlocked;
             chkRequireLetter.Checked = _user.RequireLetter;
@@ -49,6 +48,12 @@ namespace Forms
                 if (string.IsNullOrWhiteSpace(username))
                 {
                     MessageBox.Show("Имя пользователя не может быть пустым.");
+                    return;
+                }
+
+                if (isBlocked && string.Equals(username, "ADMIN"))
+                {
+                    MessageBox.Show("Администратора нельзя заблокировать");
                     return;
                 }
 

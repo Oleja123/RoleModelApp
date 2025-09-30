@@ -62,91 +62,58 @@
             // 
             this.menuStripMain.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-                this.menuFile,
-                this.menuHelp,
-                this.menuExit
-            });
+        this.menuFile,
+        this.menuHelp
+    });
             this.menuStripMain.Location = new System.Drawing.Point(0, 0);
             this.menuStripMain.Name = "menuStripMain";
-            this.menuStripMain.Size = new System.Drawing.Size(1500, 28);
+            this.menuStripMain.Size = new System.Drawing.Size(1000, 28);
             this.menuStripMain.TabIndex = 0;
-            this.menuStripMain.Text = "menuStripMain";
 
             // 
             // menuFile
             // 
             this.menuFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-                this.menuRefresh,
-                this.menuMoveTop,
-                this.menuMoveBottom,
-                this.menuAddUser,
-                this.menuChangeAdminPassword,
-                this.menuEditUser
-            });
-            this.menuFile.Name = "menuFile";
+        this.menuRefresh,
+        this.menuMoveTop,
+        this.menuMoveBottom,
+        this.menuAddUser,
+        this.menuChangeAdminPassword,
+        this.menuEditUser,
+        new ToolStripSeparator(),
+        this.menuExit
+    });
             this.menuFile.Text = "Файл";
 
-            // 
-            // menuRefresh
-            // 
-            this.menuRefresh.Name = "menuRefresh";
             this.menuRefresh.Text = "Обновить список";
             this.menuRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
 
-            // 
-            // menuMoveTop
-            // 
-            this.menuMoveTop.Name = "menuMoveTop";
             this.menuMoveTop.Text = "В начало списка";
             this.menuMoveTop.Click += new System.EventHandler(this.btnMoveTop_Click);
 
-            // 
-            // menuMoveBottom
-            // 
-            this.menuMoveBottom.Name = "menuMoveBottom";
             this.menuMoveBottom.Text = "В конец списка";
             this.menuMoveBottom.Click += new System.EventHandler(this.btnMoveBottom_Click);
 
-            // 
-            // menuAddUser
-            // 
-            this.menuAddUser.Name = "menuAddUser";
-            this.menuAddUser.Text = "Добавить";
+            this.menuAddUser.Text = "Добавить пользователя";
             this.menuAddUser.Click += new System.EventHandler(this.btnAddUser_Click);
 
-            // 
-            // menuChangeAdminPassword
-            // 
-            this.menuChangeAdminPassword.Name = "menuChangeAdminPassword";
             this.menuChangeAdminPassword.Text = "Сменить пароль администратора";
             this.menuChangeAdminPassword.Click += new System.EventHandler(this.BtnChangeAdminPassword_Click);
 
-            // 
-            // menuEditUser
-            // 
-            this.menuEditUser.Name = "menuEditUser";
             this.menuEditUser.Text = "Редактировать пользователя";
             this.menuEditUser.Click += new System.EventHandler(this.btnEditUser_Click);
 
-            // 
-            // menuExit
-            // 
-            this.menuExit.Name = "menuExit";
             this.menuExit.Text = "Выход";
+            this.menuExit.Click += (s, e) => this.Close();
 
             // 
             // menuHelp
             // 
             this.menuHelp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-                this.menuAbout
-            });
-            this.menuHelp.Name = "menuHelp";
+        this.menuAbout
+    });
             this.menuHelp.Text = "Справка";
 
-            // 
-            // menuAbout
-            // 
-            this.menuAbout.Name = "menuAbout";
             this.menuAbout.Text = "О программе";
             this.menuAbout.Click += (s, e) =>
             {
@@ -154,9 +121,9 @@
                     "Салин Олег Алексеевич\n" +
                     "Группа: ПИбд-43\n" +
                     "Ограничения на выбираемые пароли: 20. Наличие букв и знаков препинания.\n" +
-                    "Используемый режим шифрования алгоритма DES для шифрования файла: OFB\n" +
+                    "Используемый режим шифрования DES: OFB\n" +
                     "Добавление к ключу случайного значения: Нет\n" +
-                    "Используемый алгоритм хеширования пароля: MD5",
+                    "Алгоритм хеширования пароля: MD5",
                     "О программе", MessageBoxButtons.OK, MessageBoxIcon.Information);
             };
 
@@ -167,105 +134,73 @@
             this.dataGridViewUsers.AllowUserToDeleteRows = false;
             this.dataGridViewUsers.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridViewUsers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewUsers.Location = new System.Drawing.Point(12, 40);
             this.dataGridViewUsers.MultiSelect = false;
-            this.dataGridViewUsers.Name = "dataGridViewUsers";
             this.dataGridViewUsers.ReadOnly = true;
             this.dataGridViewUsers.RowHeadersVisible = false;
             this.dataGridViewUsers.RowTemplate.Height = 24;
             this.dataGridViewUsers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewUsers.Size = new System.Drawing.Size(1476, 400);
-            this.dataGridViewUsers.TabIndex = 1;
+            this.dataGridViewUsers.Dock = DockStyle.Fill; // теперь занимает всё доступное место
+            this.dataGridViewUsers.ScrollBars = ScrollBars.Vertical; // вертикальный скролл
+            this.dataGridViewUsers.CurrentCellDirtyStateChanged += new System.EventHandler(this.dataGridViewUsers_CurrentCellDirtyStateChanged);
+            this.dataGridViewUsers.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewUsers_CellEndEdit);
 
             // 
-            // btnRefresh
+            // Панель с кнопками
             // 
-            this.btnRefresh.Location = new System.Drawing.Point(12, 450);
-            this.btnRefresh.Name = "btnRefresh";
-            this.btnRefresh.Size = new System.Drawing.Size(150, 30);
-            this.btnRefresh.TabIndex = 2;
+            FlowLayoutPanel panelButtons = new FlowLayoutPanel();
+            panelButtons.Dock = DockStyle.Bottom;
+            panelButtons.FlowDirection = FlowDirection.LeftToRight;
+            panelButtons.Padding = new Padding(10);
+            panelButtons.WrapContents = true;
+            panelButtons.AutoSize = true;
+            panelButtons.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+
             this.btnRefresh.Text = "Обновить список";
-            this.btnRefresh.UseVisualStyleBackColor = true;
+            this.btnRefresh.AutoSize = true;
             this.btnRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
 
-            // 
-            // btnMoveTop
-            // 
-            this.btnMoveTop.Location = new System.Drawing.Point(180, 450);
-            this.btnMoveTop.Name = "btnMoveTop";
-            this.btnMoveTop.Size = new System.Drawing.Size(150, 30);
-            this.btnMoveTop.TabIndex = 3;
             this.btnMoveTop.Text = "В начало списка";
-            this.btnMoveTop.UseVisualStyleBackColor = true;
+            this.btnMoveTop.AutoSize = true;
             this.btnMoveTop.Click += new System.EventHandler(this.btnMoveTop_Click);
 
-            // 
-            // btnMoveBottom
-            // 
-            this.btnMoveBottom.Location = new System.Drawing.Point(350, 450);
-            this.btnMoveBottom.Name = "btnMoveBottom";
-            this.btnMoveBottom.Size = new System.Drawing.Size(150, 30);
-            this.btnMoveBottom.TabIndex = 4;
             this.btnMoveBottom.Text = "В конец списка";
-            this.btnMoveBottom.UseVisualStyleBackColor = true;
+            this.btnMoveBottom.AutoSize = true;
             this.btnMoveBottom.Click += new System.EventHandler(this.btnMoveBottom_Click);
 
-            // 
-            // btnAddUser
-            // 
-            this.btnAddUser.Location = new System.Drawing.Point(520, 450);
-            this.btnAddUser.Name = "btnAddUser";
-            this.btnAddUser.Size = new System.Drawing.Size(150, 30);
-            this.btnAddUser.TabIndex = 5;
             this.btnAddUser.Text = "Добавить пользователя";
-            this.btnAddUser.UseVisualStyleBackColor = true;
+            this.btnAddUser.AutoSize = true;
             this.btnAddUser.Click += new System.EventHandler(this.btnAddUser_Click);
 
-            // 
-            // btnChangeAdminPassword
-            // 
-            this.btnChangeAdminPassword.Location = new System.Drawing.Point(680, 450);
-            this.btnChangeAdminPassword.Name = "btnChangeAdminPassword";
-            this.btnChangeAdminPassword.Size = new System.Drawing.Size(150, 30);
-            this.btnChangeAdminPassword.TabIndex = 6;
             this.btnChangeAdminPassword.Text = "Сменить пароль";
-            this.btnChangeAdminPassword.UseVisualStyleBackColor = true;
+            this.btnChangeAdminPassword.AutoSize = true;
             this.btnChangeAdminPassword.Click += new System.EventHandler(this.BtnChangeAdminPassword_Click);
 
-            // 
-            // btnEditUser
-            // 
-            this.btnEditUser.Location = new System.Drawing.Point(840, 450);
-            this.btnEditUser.Name = "btnEditUser";
-            this.btnEditUser.Size = new System.Drawing.Size(150, 30);
-            this.btnEditUser.TabIndex = 7;
             this.btnEditUser.Text = "Редактировать";
-            this.btnEditUser.UseVisualStyleBackColor = true;
+            this.btnEditUser.AutoSize = true;
             this.btnEditUser.Click += new System.EventHandler(this.btnEditUser_Click);
+
+            panelButtons.Controls.AddRange(new Control[] {
+        this.btnRefresh,
+        this.btnMoveTop,
+        this.btnMoveBottom,
+        this.btnAddUser,
+        this.btnChangeAdminPassword,
+        this.btnEditUser
+    });
 
             // 
             // AdminForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1500, 500);
+            this.MinimumSize = new System.Drawing.Size(1200, 500);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Controls.Add(this.dataGridViewUsers);
-            this.Controls.Add(this.btnRefresh);
-            this.Controls.Add(this.btnMoveTop);
-            this.Controls.Add(this.btnMoveBottom);
-            this.Controls.Add(this.btnAddUser);
-            this.Controls.Add(this.btnChangeAdminPassword);
-            this.Controls.Add(this.btnEditUser);
+            this.Controls.Add(panelButtons);
             this.Controls.Add(this.menuStripMain);
             this.MainMenuStrip = this.menuStripMain;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Name = "AdminForm";
             this.Text = "Администрирование пользователей";
-
-            this.dataGridViewUsers.CurrentCellDirtyStateChanged += new System.EventHandler(this.dataGridViewUsers_CurrentCellDirtyStateChanged);
-            this.dataGridViewUsers.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewUsers_CellEndEdit);
 
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewUsers)).EndInit();
             this.menuStripMain.ResumeLayout(false);
@@ -273,5 +208,6 @@
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
     }
 }
